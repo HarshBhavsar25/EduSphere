@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>P.E.S. Modern College | Crystal Clear Windows | Sky Blue Campus</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Segoe UI', 'Inter', system-ui, sans-serif;
+            touch-action: none;
+        }
+        #info-card {
+            position: absolute;
+            top: max(12px, env(safe-area-inset-top, 12px));
+            left: max(12px, env(safe-area-inset-left, 12px));
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(12px);
+            border-radius: clamp(12px, 4vw, 20px);
+            padding: clamp(8px, 2vw, 12px) clamp(12px, 3vw, 24px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255,215,0,0.5);
+            pointer-events: none;
+            z-index: 10;
+            color: #fff;
+            font-weight: 500;
+            border-left: 4px solid #ffd700;
+            max-width: min(85%, 380px);
+        }
+        #info-card h1 {
+            margin: 0;
+            font-size: clamp(0.7rem, 3.2vw, 1rem);
+            line-height: 1.3;
+        }
+        #info-card p {
+            margin: 4px 0 0;
+            font-size: clamp(0.55rem, 2.3vw, 0.7rem);
+            opacity: 0.9;
+        }
+        #hover-status {
+            color: #ffd700;
+            font-weight: bold;
+        }
+        .controls-panel {
+            position: absolute;
+            bottom: max(12px, env(safe-area-inset-bottom, 12px));
+            left: max(12px, env(safe-area-inset-left, 12px));
+            right: max(12px, env(safe-area-inset-right, 12px));
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(20px);
+            border-radius: clamp(24px, 6vw, 36px);
+            padding: clamp(10px, 2.5vw, 14px) clamp(14px, 3vw, 24px);
+            display: flex;
+            flex-wrap: wrap;
+            gap: clamp(6px, 2vw, 12px);
+            z-index: 20;
+            font-size: clamp(11px, 3vw, 13px);
+            font-weight: 500;
+            color: white;
+            border: 1px solid rgba(255,215,0,0.4);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+            pointer-events: auto;
+            justify-content: center;
+        }
+        .ctrl-group {
+            background: rgba(30, 40, 55, 0.9);
+            padding: 4px clamp(8px, 2vw, 14px);
+            border-radius: 40px;
+            display: flex;
+            gap: clamp(6px, 1.5vw, 12px);
+            align-items: center;
+            backdrop-filter: blur(4px);
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        button, select, input {
+            background: #1e2f3f;
+            border: none;
+            color: white;
+            padding: clamp(5px, 1.5vw, 7px) clamp(12px, 3vw, 18px);
+            border-radius: 32px;
+            cursor: pointer;
+            font-size: clamp(11px, 2.8vw, 13px);
+            font-weight: 500;
+            transition: all 0.2s ease;
+            font-family: inherit;
+            white-space: nowrap;
+        }
+        button:hover, select:hover { background: #ffd700; color: #1a2a3a; transform: translateY(-1px); }
+        input { background: #0f1a24; min-width: 100px; }
+        input:focus { outline: none; border: 1px solid #ffd700; background: #1a2c3c; }
+        #measureStatus { color: #ffd700; font-size: clamp(10px, 2.5vw, 11px); margin-left: 4px; }
+        .mini-map {
+            position: absolute;
+            bottom: max(85px, 15vh);
+            right: max(12px, env(safe-area-inset-right, 12px));
+            width: clamp(150px, 26vw, 210px);
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(12px);
+            border-radius: clamp(12px, 4vw, 20px);
+            padding: clamp(8px, 2vw, 12px);
+            border: 1px solid rgba(255,215,0,0.5);
+            color: #ffd700;
+            font-size: clamp(8px, 2.5vw, 10px);
+            font-family: monospace;
+            pointer-events: none;
+            z-index: 15;
+            text-align: center;
+            font-weight: bold;
+            line-height: 1.4;
+        }
+        @media (max-width: 640px) {
+            .controls-panel { flex-direction: column; align-items: stretch; gap: 8px; padding: 12px; }
+            .ctrl-group { justify-content: space-between; }
+            .mini-map { bottom: auto; top: max(70px, env(safe-area-inset-top, 70px)); right: 10px; width: 130px; font-size: 7px; }
+            #info-card { max-width: 75%; }
+            input { min-width: 80px; }
+        }
+        @media (orientation: landscape) and (max-height: 500px) {
+            .controls-panel { flex-direction: row; flex-wrap: wrap; bottom: 8px; padding: 8px 12px; }
+            .mini-map { bottom: 70px; top: auto; }
+        }
+        .css2d-label { pointer-events: none; font-weight: 500; text-shadow: 1px 1px 0px rgba(0,0,0,0.5); white-space: nowrap; }
+        @media (max-width: 480px) { .css2d-label { font-size: 7px !important; transform: scale(0.85); } }
+    </style>
+</head>
+<body>
+    <div id="info-card">
+        <h1>🏛️ MODERN COLLEGE OF ENGINEERING | PUNE | G+4 | SKY BLUE WALLS</h1>
+        <p>✨ Crystal Clear Windows on All Sides | Canteen | Playground | Gym | <span id="hover-status">Hover any room</span></p>
+    </div>
+    <div class="controls-panel">
+        <div class="ctrl-group">🎚️ FLOORS: <button id="floorG">G</button><button id="floor1">1</button><button id="floor2">2</button><button id="floor3">3</button><button id="floor4">4</button><button id="resetFloors">ALL</button></div>
+        <div class="ctrl-group">🏷️ DEPT: <select id="deptFilter"><option value="all">All Depts</option><option value="Mechanical">Mechanical</option><option value="Electrical">Electrical</option><option value="Computer Science">CSE</option><option value="IT">IT</option><option value="E&TC">E&TC</option><option value="AIDS">AIDS</option><option value="Admin">Admin/Faculty</option></select></div>
+        <div class="ctrl-group">🔍 SEARCH: <input type="text" id="roomSearch" placeholder="Room No / Name"></div>
+        <div class="ctrl-group">🛠️ TOOLS: <button id="explodedBtn">💥 Explode</button><button id="crossSectionBtn">✂️ Cross</button><button id="dayNightBtn">🌙 Night</button><button id="measureBtn">📏 Measure</button></div>
+        <div class="ctrl-group">🗺️ <button id="resetView">Reset Camera</button><span id="measureStatus"></span></div>
+    </div>
+    <div class="mini-map">
+        🗺️ COMPLETE CAMPUS<br/>
+        🪟 Crystal Clear Windows | 🍽️ Canteen | ⚽ Playground | 🏋️ Gym
+    </div>
+
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.128.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.128.0/examples/jsm/"
+            }
+        }
+    </script>
+
+    <script type="module" src="/campus3d_script.js"></script>
+</body>
+</html>

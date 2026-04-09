@@ -1,0 +1,222 @@
+.virtual-campus-page {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 24px;
+    gap: 16px;
+    animation: vc-fadeIn 0.5s ease-out;
+}
+
+@keyframes vc-fadeIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Header ─────────────────────────────────────────── */
+.vc-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.vc-header-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.vc-icon-badge {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #6366f1, #0ea5e9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+    flex-shrink: 0;
+}
+
+.vc-title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #f0f4ff;
+    margin: 0;
+    letter-spacing: -0.5px;
+    background: linear-gradient(135deg, #fff 40%, #6366f1);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.vc-subtitle {
+    margin: 2px 0 0;
+    font-size: 0.82rem;
+    color: rgba(255,255,255,0.45);
+}
+
+.vc-header-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.vc-info-chip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    padding: 7px 14px;
+    border-radius: 30px;
+    font-size: 0.78rem;
+    color: rgba(255,255,255,0.55);
+}
+
+.vc-fullscreen-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, #6366f1, #0ea5e9);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 9px 18px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-family: inherit;
+    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.35);
+}
+
+.vc-fullscreen-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(99, 102, 241, 0.5);
+}
+
+/* ── Stats Bar ───────────────────────────────────────── */
+.vc-stats-bar {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 16px;
+    padding: 14px 24px;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.vc-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 24px;
+    flex: 1;
+    min-width: 80px;
+}
+
+.vc-stat-value {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: #f0f4ff;
+    font-family: 'Outfit', 'Inter', sans-serif;
+}
+
+.vc-stat-value.live-pulse {
+    color: #10b981;
+    font-size: 0.85rem;
+    letter-spacing: 1.5px;
+    text-shadow: 0 0 12px rgba(16,185,129,0.6);
+    animation: livePulse 2s infinite;
+}
+
+@keyframes livePulse {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.6; }
+}
+
+.vc-stat-label {
+    font-size: 0.72rem;
+    color: rgba(255,255,255,0.4);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-top: 2px;
+}
+
+.vc-stat-divider {
+    width: 1px;
+    height: 36px;
+    background: rgba(255,255,255,0.08);
+    flex-shrink: 0;
+}
+
+/* ── Iframe ──────────────────────────────────────────── */
+.vc-iframe-wrapper {
+    flex: 1;
+    border-radius: 20px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.1);
+    box-shadow:
+        0 0 0 1px rgba(99,102,241,0.15),
+        0 20px 60px rgba(0,0,0,0.5);
+    min-height: 480px;
+    position: relative;
+    background: #080c14;
+}
+
+.vc-iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
+    min-height: 480px;
+}
+
+/* ── Legend ──────────────────────────────────────────── */
+.vc-legend {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    padding: 4px 0;
+}
+
+.vc-legend-title {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: rgba(255,255,255,0.45);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-right: 4px;
+}
+
+.vc-legend-chip {
+    font-size: 0.78rem;
+    color: rgba(255,255,255,0.65);
+    background: rgba(99,102,241,0.1);
+    border: 1px solid rgba(99,102,241,0.25);
+    padding: 4px 10px;
+    border-radius: 20px;
+    transition: all 0.2s;
+    cursor: default;
+}
+
+.vc-legend-chip:hover {
+    background: rgba(99,102,241,0.2);
+    color: white;
+}
+
+/* ── Responsive ──────────────────────────────────────── */
+@media (max-width: 768px) {
+    .virtual-campus-page { padding: 14px; gap: 12px; }
+    .vc-stat { padding: 0 12px; }
+    .vc-stats-bar { padding: 10px 14px; }
+    .vc-title { font-size: 1.2rem; }
+    .vc-info-chip { display: none; }
+}
