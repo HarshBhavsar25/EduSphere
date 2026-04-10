@@ -182,25 +182,50 @@ export default function AIInterview() {
     }, 1000);
   }
 
-  /* ── TTS — no lag, voice pre-resolved ───────────────── */
+  /* ── TTS — chunked with Chromium keepalive to prevent freeze ── */
   const speak = useCallback((text, onDone) => {
     window.speechSynthesis.cancel();
-    const utter = new SpeechSynthesisUtterance(text);
-    utter.lang = langRef.current;
+    
+    // Split into sentences to prevent Chromium TTS freeze
+    const chunks = text.match(/[^.!?;,]+[.!?;,]+|[^.!?;,]+$/g) || [text];
+    let idx = 0;
+    
+    // Chromium bug workaround: speechSynthesis silently pauses after ~15s.
+    // Periodically calling resume() keeps it alive.
+    let keepAlive = setInterval(() => {
+      if (window.speechSynthesis.speaking) {
+        window.speechSynthesis.pause();
+        window.speechSynthesis.resume();
+      }
+    }, 5000);
 
-    // Resolve voice — try cache first, fallback on event
-    const resolveAndSpeak = () => {
+    const cleanup = () => {
+      clearInterval(keepAlive);
+    };
+
+    const playChunk = () => {
+      if (idx >= chunks.length) {
+        cleanup();
+        setIsTalking(false);
+        if (onDone) onDone();
+        return;
+      }
+      const utter = new SpeechSynthesisUtterance(chunks[idx].trim());
+      utter.lang = langRef.current;
       const voice = pickVoice(langRef.current);
       if (voice) utter.voice = voice;
       utter.rate = 0.92;
       utter.pitch = 1.05;
       utter.volume = 1;
-      utter.onstart = () => setIsTalking(true);
+      
+      if (idx === 0) setIsTalking(true);
+      
       utter.onend = () => {
-        setIsTalking(false);
-        if (onDone) onDone();
+        idx++;
+        playChunk();
       };
       utter.onerror = () => {
+        cleanup();
         setIsTalking(false);
         if (onDone) onDone();
       };
@@ -209,14 +234,13 @@ export default function AIInterview() {
 
     const voices = getVoices();
     if (voices.length) {
-      resolveAndSpeak();
+      playChunk();
     } else {
-      // Wait for voices to load (first-load case)
       const prev = window.speechSynthesis.onvoiceschanged;
       window.speechSynthesis.onvoiceschanged = () => {
         cachedVoices = window.speechSynthesis.getVoices();
         window.speechSynthesis.onvoiceschanged = prev;
-        resolveAndSpeak();
+        playChunk();
       };
     }
   }, []);
@@ -413,10 +437,14 @@ export default function AIInterview() {
       const of = data.overall_feedback || reply;
       historyRef.current.push({ role: 'assistant', content: reply });
       setOverallFeedback(of);
-      speak(reply, () => setStep('results'));
-    } catch {
-      setOverallFeedback("Thank you for the interview! Overall you showed good potential.");
+      // Move to results first, THEN speak so user sees the screen while listening
       setStep('results');
+      speak(of);
+    } catch {
+      const fallbackFeedback = "Thank you for the interview! Overall you showed good potential.";
+      setOverallFeedback(fallbackFeedback);
+      setStep('results');
+      speak(fallbackFeedback);
     } finally {
       setIsProcessing(false);
       setIsFinishing(false);

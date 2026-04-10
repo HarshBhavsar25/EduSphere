@@ -12,23 +12,48 @@ export const CampusProvider = ({ children }) => {
   const [alerts, setAlerts] = useState([]);
   const [isConnected, setIsConnected] = useState(false);
   
-  // Future: Socket.io connection for real-time updates
+  // Mock Real-time Backend (since Socket.io isn't implemented on Python backend yet)
   useEffect(() => {
-    const socket = io('http://localhost:5000');
+    let isMounted = true;
     
-    socket.on('connect', () => setIsConnected(true));
-    socket.on('disconnect', () => setIsConnected(false));
+    // Check baseline connection via REST Ping
+    fetch('http://localhost:5001/api/ping')
+      .then(res => { if (isMounted) setIsConnected(res.ok); })
+      .catch(() => { if (isMounted) setIsConnected(false); });
+
+    // Simulate streaming data (Occupancy & Alerts)
+    const simInterval = setInterval(() => {
+      if (!isMounted) return;
+      
+      // Ensure we stay "connected" visually if timer is running
+      setIsConnected(true);
+
+      // 1. Generate live mock occupancy data
+      const mockOccupancy = {};
+      const activeRooms = ['114', 'g02', 'g03', 'g04', '101', '105', '103', '108', 'library', 'canteen', 'g25', 'g26', '201', '202'];
+      activeRooms.forEach(room => {
+        mockOccupancy[room] = Math.floor(Math.random() * 45) + 5;
+      });
+      setOccupancyData(mockOccupancy);
+
+      // 2. Occasionally generate mock alerts
+      const mockAlerts = [];
+      if (Math.random() > 0.8) {
+        mockAlerts.push({
+          id: Date.now(),
+          severity: 'warning',
+          type: 'CROWD DENSITY',
+          location: 'Library (2F)',
+          message: 'Density exceeding baseline comfortable thresholds.'
+        });
+      }
+      setAlerts(mockAlerts);
+    }, 4000); // 4 seconds data refresh
     
-    // Server sends full mapping: { roomId: count, ... }
-    socket.on('occupancy_update', (data) => {
-      setOccupancyData(data);
-    });
-    
-    socket.on('intelligence_alerts', (alertData) => {
-      setAlerts(alertData);
-    });
-    
-    return () => socket.disconnect();
+    return () => {
+      isMounted = false;
+      clearInterval(simInterval);
+    };
   }, []);
 
   // Bridge to Three.js

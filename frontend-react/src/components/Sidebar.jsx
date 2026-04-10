@@ -29,7 +29,7 @@ export default function Sidebar({ activeTab, setActiveTab }) {
             <div className="sidebar-brand">
                 <div className="brand-icon"><i className="fas fa-graduation-cap" /></div>
                 <div className="brand-text">
-                    <h2>Hire<span style={{ color: '#6366f1' }}>Matrix</span></h2>
+                    <h2>Edu<span style={{ color: '#6366f1' }}>Sphere</span></h2>
                     <span>Placement Intelligence</span>
                 </div>
             </div>
