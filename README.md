@@ -1,41 +1,35 @@
-# 🎯 HireMatrix
+# 🎯 EduSphere
 
-> An AI-powered Campus Placement & Student Management Platform built with Flask + React
+![EduSphere Dashboard Mockup](/assets/dashboard-mock.png)
 
-![Tech Stack](https://img.shields.io/badge/Stack-Flask%20%7C%20React%20%7C%20MongoDB-blue?style=for-the-badge)
-![AI](https://img.shields.io/badge/AI-Groq%20LLM-purple?style=for-the-badge)
-![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
+> **EduSphere** is a full-stack campus placement management system that leverages AI to streamline the hiring process for students, placement officers, and company recruiters. It features intelligent performance analytics, AI-powered mock tests, placement tracking, and role-based dashboards.
 
----
+## 🚀 Features
 
-## 🚀 Overview
+- **🎓 Student Portal**: Track placement status, build AI-optimized resumes, and practice with AI Mock Interviews.
+- **👨‍💼 Admin/Placement Officer Portal**: Analyze cohort performance, manage student profiles, and coordinate recruitment drives.
+- **📊 Real-time Analytics Dashboard**: Live metrics for placement rates, top hiring companies, and salary distributions.
+- **🤖 AI Agent Tools**: Automated resume scoring and interactive interview practice powered by Groq Llama3.
+- **🗺️ Virtual Campus 3D**: Explore real campus facilities in an interactive 3D WebGL environment.
+- **📍 Cohort Analytics 2D Area**: Live simulated occupancy and intelligence dashboard.
 
-**HireMatrix** is a full-stack campus placement management system that leverages AI to streamline the hiring process for students, placement officers, and company recruiters. It features intelligent performance analytics, AI-powered mock tests, placement tracking, and role-based dashboards.
+## 🛠️ Technology Stack
 
----
+- **Frontend**: React (Vite), CSS3 Glassmorphism, Recharts, Three.js (React Three Fiber)
+- **Backend**: Python (Flask), Flask-CORS, python-dotenv
+- **Database**: MongoDB (Atlas)
+- **AI & Integrations**: Groq Cloud SDK (Llama 3 8B), Pinecone (Vector database for OCR search/RAG)
+- **Live Data**: Web sockets (simulated frontend polling & REST pings)
 
-## ✨ Features
+## 📁 Project Structure
 
-- 🤖 **AI Analysis** — Groq LLM-powered student performance insights and recommendations
-- 📊 **Analytics Dashboard** — Visual breakdowns of placement stats, company trends, and student progress
-- 🏢 **Company Management** — Add, update, and track recruiting companies and job listings
-- 🎓 **Student Management** — Full student profile management with academic and placement records
-- 📝 **Mock Tests** — AI-generated mock interview questions for placement preparation
-- 🔐 **Role-Based Auth** — Separate portals for Admin, Students, and Placement Officers
-- 📈 **Placement Tracking** — End-to-end tracking of offers, interviews, and selections
-- ⚙️ **Admin Panel** — Full control over users, companies, and system configuration
-
----
-
-## 🛠️ Tech Stack
-
-| Layer | Technology |
+```text
+EduSphere/ | Technology |
 |-------|-----------|
 | **Frontend** | React 18, Vite, CSS (Glassmorphism UI) |
 | **Backend** | Python, Flask, Flask-CORS |
 | **Database** | MongoDB (via PyMongo) |
 | **AI Engine** | Groq API (LLaMA models) |
-| **Auth** | JWT (PyJWT) + bcrypt |
 | **Deployment** | Render (via `render.yaml`) |
 
 ---

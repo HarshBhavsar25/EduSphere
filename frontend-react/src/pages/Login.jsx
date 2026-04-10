@@ -63,7 +63,7 @@ export default function Login() {
                     {/* Header */}
                     <div className="login-header">
                         <div className="logo-icon"><i className="fas fa-graduation-cap" /></div>
-                        <h1>Hire<span>Matrix</span></h1>
+                        <h1>Edu<span>Sphere</span></h1>
                         <p>Placement Intelligence Platform</p>
                     </div>
 
@@ -145,7 +145,7 @@ export default function Login() {
                         </form>
                     )}
 
-                    <div className="login-footer">© 2025 HireMatrix — All rights reserved</div>
+                    <div className="login-footer">© 2025 EduSphere — All rights reserved</div>
                 </div>
             </div>
         </div>
