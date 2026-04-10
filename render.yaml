@@ -1,7 +1,7 @@
 services:
   # ─── Single Service: Build React then serve via Flask ─────────────────────
   - type: web
-    name: hirematrix
+    name: edusphere
     env: python
     region: oregon
     plan: free
@@ -11,13 +11,19 @@ services:
       cd ../backend && pip install -r requirements.txt
     startCommand: cd backend && gunicorn app:app --bind 0.0.0.0:$PORT --workers 1 --timeout 120
     envVars:
+      - key: GROQ_API_KEY
+        sync: false
+      - key: PINECONE_API_KEY
+        sync: false
+      - key: PINECONE_INDEX_NAME
+        value: campus-memory
+      - key: PINECONE_REGION
+        value: us-east-1
+      - key: GROQ_MODEL
+        value: llama-3.3-70b-versatile
+      - key: SECRET_KEY
+        generateValue: true
       - key: MONGO_URI
         sync: false
       - key: MONGO_DB_NAME
-        value: hirematrix
-      - key: GROQ_API_KEY
-        sync: false
-      - key: SECRET_KEY
-        generateValue: true
-      - key: GROQ_MODEL
-        value: llama-3.3-70b-versatile
+        value: hire_matrix2
