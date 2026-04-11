@@ -101,7 +101,7 @@ const CohortAnalytics = () => {
     setIsTyping(true);
 
     try {
-      const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5001';
+      const baseUrl = import.meta.env.VITE_API_BASE_URL || '';
       const response = await fetch(`${baseUrl}/api/ai/ask`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
