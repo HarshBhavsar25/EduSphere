@@ -114,7 +114,7 @@ def seed():
         # ── Create Companies ──
         print("Creating companies...")
         companies = []
-        for name, industry, min_pkg, max_pkg in COMPANIES_DATA[:10]:
+        for name, industry, min_pkg, max_pkg in COMPANIES_DATA:
             req_skills = random.sample(SKILLS_POOL['Computer Science'] + SKILLS_POOL['Information Technology'], random.randint(3, 6))
             company = {
                 'name': name, 'industry': industry,
@@ -133,7 +133,7 @@ def seed():
         print("Creating students...")
         students = []
         used_emails = set()
-        for i in range(100):
+        for i in range(500):
             gender = random.choices(['Male', 'Female'], weights=[55, 45])[0]
             first = random.choice(FIRST_NAMES_M if gender == 'Male' else FIRST_NAMES_F)
             last = random.choice(LAST_NAMES)
