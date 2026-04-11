@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: edusphere-app
+  labels:
+    app: edusphere
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: edusphere
+  template:
+    metadata:
+      labels:
+        app: edusphere
+    spec:
+      containers:
+      - name: edusphere-app
+        image: edusphere-app:latest # Make sure to tag and push image appropriately
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 5001
+        envFrom:
+        - secretRef:
+            name: edusphere-secrets
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 5001
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 5001
+          initialDelaySeconds: 15
+          periodSeconds: 10

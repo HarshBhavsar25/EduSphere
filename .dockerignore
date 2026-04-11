@@ -1,0 +1,10 @@
+node_modules/
+.git/
+.gitignore
+backend/__pycache__/
+backend/venv/
+.env
+.DS_Store
+README.md
+frontend-react/dist/
+frontend-react/node_modules/

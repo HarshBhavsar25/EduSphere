@@ -17,7 +17,8 @@ export const CampusProvider = ({ children }) => {
     let isMounted = true;
     
     // Check baseline connection via REST Ping
-    fetch('http://localhost:5001/api/ping')
+    const baseUrl = import.meta.env.VITE_API_BASE_URL || '';
+    fetch(`${baseUrl}/api/ping`)
       .then(res => { if (isMounted) setIsConnected(res.ok); })
       .catch(() => { if (isMounted) setIsConnected(false); });
 
