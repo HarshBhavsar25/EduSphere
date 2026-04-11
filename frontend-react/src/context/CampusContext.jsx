@@ -1,5 +1,6 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { io } from 'socket.io-client';
+import { LOCATIONS } from '../config/locations';
 
 const CampusContext = createContext();
 
@@ -29,24 +30,13 @@ export const CampusProvider = ({ children }) => {
       // Ensure we stay "connected" visually if timer is running
       setIsConnected(true);
 
-      // 1. Generate live mock occupancy data — large campus with varied room types
-      const allRooms = [
-        // Ground floor
-        'g01', 'g02', 'g03', 'g04', 'g05', 'g06', 'g25', 'g26',
-        // 1st floor
-        '101', '103', '105', '108', '110', '112', '114', '116',
-        // 2nd floor
-        '201', '202', '203', '205', '207', '210',
-        // Common areas
-        'library', 'canteen', 'auditorium', 'lab1', 'lab2', 'lab3',
-        'seminar_hall', 'sports_hall', 'parking', 'admin_block',
-      ];
-
+      // 1. Generate live mock occupancy data — using LOCATIONS from config
       const mockOccupancy = {};
-      allRooms.forEach(room => {
+      LOCATIONS.forEach(roomObj => {
+        const room = roomObj.id;
         // Weighted distribution: common areas get more crowd
-        const isHotspot = ['canteen', 'library', 'auditorium', 'seminar_hall'].includes(room);
-        const isLab = room.startsWith('lab');
+        const isHotspot = ['canteen', 'library', 'auditorium', 'seminar_hall'].includes(room) || roomObj.type === 'Library' || roomObj.type === 'Canteen' || roomObj.type === 'Seminar';
+        const isLab = roomObj.type === 'Lab';
         const max = isHotspot ? 120 : isLab ? 60 : 80;
         const min = isHotspot ? 40 : 2;
         mockOccupancy[room] = Math.floor(Math.random() * (max - min)) + min;
