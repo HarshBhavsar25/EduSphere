@@ -103,7 +103,24 @@ export default function StudentManager() {
                                     <td>{s.branch}</td>
                                     <td style={{ fontWeight: 700, color: s.cgpa >= 8 ? '#34d399' : s.cgpa >= 7 ? '#60a5fa' : '#fbbf24' }}>{s.cgpa}</td>
                                     <td style={{ fontSize: '0.8rem' }}>{(s.skills || []).slice(0, 3).join(', ')}{(s.skills || []).length > 3 ? '…' : ''}</td>
-                                    <td><span className={`badge ${s.placed ? 'badge-placed' : 'badge-seeking'}`}>{s.placed ? 'Placed' : 'Seeking'}</span></td>
+                                    <td>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                            <span className={`badge ${s.placed ? 'badge-placed' : 'badge-seeking'}`}>
+                                                {s.placed ? 'Placed' : 'Seeking'}
+                                            </span>
+                                            {s.blockchain_tx_id && (
+                                                <a 
+                                                    href={`https://testnet.explorer.perawallet.app/tx/${s.blockchain_tx_id}`} 
+                                                    target="_blank" 
+                                                    rel="noopener noreferrer"
+                                                    title="Verified on Algorand Blockchain"
+                                                    style={{ color: '#34d399', fontSize: '0.9rem', cursor: 'pointer' }}
+                                                >
+                                                    <i className="fas fa-shield-alt" />
+                                                </a>
+                                            )}
+                                        </div>
+                                    </td>
                                     <td>
                                         <div style={{ display: 'flex', gap: '0.4rem' }}>
                                             <button className="btn btn-sm" style={{ background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.2)', color: '#a5b4fc' }} onClick={() => openEdit(s)}>
@@ -178,6 +195,23 @@ export default function StudentManager() {
                                 <label className="form-label">Skills (comma-separated)</label>
                                 <input className="form-input" value={form.skills} onChange={e => setForm(f => ({ ...f, skills: e.target.value }))} placeholder="Python, React, SQL..." />
                             </div>
+                            {modal.mode === 'edit' && students.find(s => s.id === modal.id)?.blockchain_tx_id && (
+                                <div className="form-group full">
+                                    <label className="form-label">Blockchain TX ID (Verified)</label>
+                                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                                        <input className="form-input" value={students.find(s => s.id === modal.id).blockchain_tx_id} readOnly style={{ opacity: 0.7, cursor: 'default' }} />
+                                        <a 
+                                            href={`https://testnet.explorer.perawallet.app/tx/${students.find(s => s.id === modal.id).blockchain_tx_id}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="btn btn-sm"
+                                            style={{ background: 'rgba(52, 211, 153, 0.1)', color: '#34d399', border: '1px solid rgba(52, 211, 153, 0.2)', whiteSpace: 'nowrap' }}
+                                        >
+                                            <i className="fas fa-external-link-alt" /> View Ledger
+                                        </a>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                         <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end', marginTop: '1.5rem' }}>
                             <button className="btn" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border-color)', color: 'var(--text-secondary)' }} onClick={() => setModal(null)}>Cancel</button>
