@@ -147,3 +147,5 @@ MIT License — feel free to use and modify.
 
 - **Sanket Yeul** 
 - **Harsh Bhavsar**
+- **Sakshi Gaikwad**
+- **Tanuja Giri**
