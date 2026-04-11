@@ -309,25 +309,47 @@ createCar(-20, -14, 0xffd700, -0.4);
 createCar(28, -16, 0xffffff, 0.6);
 createCar(-32, 20, 0x44aa44, 0.7);
 
-// ========== MAIN BUILDING with CRYSTAL CLEAR WINDOWS ==========
+// ========== MAIN BUILDING - tracked for explode animation ==========
 const skyBlueMat = new THREE.MeshStandardMaterial({ color: 0x87CEEB, roughness: 0.2, metalness: 0.08 });
 const darkSkyBlue = new THREE.MeshStandardMaterial({ color: 0x5F9EA0, roughness: 0.25 });
 const goldAccent = new THREE.MeshStandardMaterial({ color: 0xffd700, metalness: 0.92, roughness: 0.2 });
 const windowGlassCrisp = new THREE.MeshStandardMaterial({ color: 0xc8e8ff, metalness: 0.98, roughness: 0.08, emissiveIntensity: 0.12 });
+
+// ===== EXPLODE SYSTEM =====
+// All building meshes/groups are tracked here with their original position + random blast velocity
+const buildingParts = []; // { obj: Mesh|Group, origPos: Vector3, origRot: Euler, vel: Vector3, angVel: Vector3 }
+
+function registerBuildingPart(obj) {
+    obj.updateMatrixWorld(true);
+    buildingParts.push({
+        obj,
+        origPos: obj.position.clone(),
+        origRot: new THREE.Euler(obj.rotation.x, obj.rotation.y, obj.rotation.z, obj.rotation.order),
+        vel: new THREE.Vector3(),
+        angVel: new THREE.Vector3()
+    });
+}
+
+// Helper that adds to scene AND registers for explode
+function addBuilding(obj) {
+    scene.add(obj);
+    registerBuildingPart(obj);
+    return obj;
+}
 
 // A Wing
 const aWing = new THREE.Mesh(new THREE.BoxGeometry(14.8, 18.4, 45.5), skyBlueMat);
 aWing.position.set(0, 9.2, -20);
 aWing.castShadow = true;
 aWing.receiveShadow = true;
-scene.add(aWing);
+addBuilding(aWing);
 
 // B Wing
 const bWing = new THREE.Mesh(new THREE.BoxGeometry(39.5, 18.4, 15), skyBlueMat);
 bWing.position.set(21, 9.2, 0);
 bWing.castShadow = true;
 bWing.receiveShadow = true;
-scene.add(bWing);
+addBuilding(bWing);
 
 // Gold horizontal bands
 for (let i = 0; i < 5; i++) {
@@ -335,137 +357,91 @@ for (let i = 0; i < 5; i++) {
     const bandA = new THREE.Mesh(new THREE.BoxGeometry(15.3, 0.14, 45.9), goldAccent);
     bandA.position.set(0, yBand, -20);
     bandA.castShadow = true;
-    scene.add(bandA);
+    addBuilding(bandA);
     const bandB = new THREE.Mesh(new THREE.BoxGeometry(39.9, 0.14, 15.3), goldAccent);
     bandB.position.set(21, yBand, 0);
     bandB.castShadow = true;
-    scene.add(bandB);
+    addBuilding(bandB);
 }
 
-// CRYSTAL CLEAR WINDOW FUNCTION - each window is a separate group with sharp geometry
+// CRYSTAL CLEAR WINDOW FUNCTION
 function addCrystalWindow(x, y, z, width, height, rotationY = 0) {
     const group = new THREE.Group();
-    
-    // Outer golden frame (thick and sharp)
-    const outerFrame = new THREE.Mesh(
-        new THREE.BoxGeometry(width + 0.12, height + 0.12, 0.1),
-        goldAccent
-    );
+    const outerFrame = new THREE.Mesh(new THREE.BoxGeometry(width + 0.12, height + 0.12, 0.1), goldAccent);
     outerFrame.castShadow = true;
     group.add(outerFrame);
-    
-    // Glass panel (crisp, reflective)
-    const glass = new THREE.Mesh(
-        new THREE.BoxGeometry(width - 0.08, height - 0.08, 0.06),
-        windowGlassCrisp
-    );
+    const glass = new THREE.Mesh(new THREE.BoxGeometry(width - 0.08, height - 0.08, 0.06), windowGlassCrisp);
     glass.position.z = 0.04;
     glass.castShadow = true;
     group.add(glass);
-    
-    // Inner frame (thin golden border)
-    const innerFrame = new THREE.Mesh(
-        new THREE.BoxGeometry(width - 0.04, height - 0.04, 0.08),
-        new THREE.MeshStandardMaterial({ color: 0xffaa33, metalness: 0.85 })
-    );
+    const innerFrame = new THREE.Mesh(new THREE.BoxGeometry(width - 0.04, height - 0.04, 0.08), new THREE.MeshStandardMaterial({ color: 0xffaa33, metalness: 0.85 }));
     innerFrame.position.z = 0.02;
     innerFrame.castShadow = true;
     group.add(innerFrame);
-    
-    // Horizontal mullion (cross bar)
-    const mullionH = new THREE.Mesh(
-        new THREE.BoxGeometry(width - 0.15, 0.07, 0.09),
-        goldAccent
-    );
+    const mullionH = new THREE.Mesh(new THREE.BoxGeometry(width - 0.15, 0.07, 0.09), goldAccent);
     mullionH.position.z = 0.05;
     group.add(mullionH);
-    
-    // Vertical mullion
-    const mullionV = new THREE.Mesh(
-        new THREE.BoxGeometry(0.07, height - 0.15, 0.09),
-        goldAccent
-    );
+    const mullionV = new THREE.Mesh(new THREE.BoxGeometry(0.07, height - 0.15, 0.09), goldAccent);
     mullionV.position.z = 0.05;
     group.add(mullionV);
-    
-    // Window sill (bottom decorative)
-    const sill = new THREE.Mesh(
-        new THREE.BoxGeometry(width + 0.18, 0.08, 0.15),
-        goldAccent
-    );
+    const sill = new THREE.Mesh(new THREE.BoxGeometry(width + 0.18, 0.08, 0.15), goldAccent);
     sill.position.y = -height/2 - 0.08;
     sill.position.z = 0.02;
     sill.castShadow = true;
     group.add(sill);
-    
     group.position.set(x, y, z);
     if (rotationY !== 0) group.rotation.y = rotationY;
-    scene.add(group);
+    addBuilding(group);
 }
 
-// Floor Y positions for windows (center of each floor)
 const windowFloorsY = [1.5, 5.15, 8.8, 12.45, 16.1];
 const winW = 1.6, winH = 1.85;
 
-// ===== A-WING WINDOWS (All 4 sides perfectly placed) =====
-// Front face (Z = -42.5)
+// A-WING WINDOWS
 windowFloorsY.forEach(y => {
     for (let x = -5.8; x <= 5.8; x += 3.9) {
         addCrystalWindow(x, y, -42.48, winW, winH);
     }
 });
-
-// Back face (Z = 2.5)
 windowFloorsY.forEach(y => {
     for (let x = -5.8; x <= 5.8; x += 3.9) {
         addCrystalWindow(x, y, 2.48, winW, winH);
     }
 });
-
-// Left face (X = -7.4)
 windowFloorsY.forEach(y => {
     for (let z = -38; z <= -2; z += 4.3) {
         addCrystalWindow(-7.38, y, z, winW, winH, Math.PI / 2);
     }
 });
-
-// Right face (X = 7.4)
 windowFloorsY.forEach(y => {
     for (let z = -38; z <= -2; z += 4.3) {
         addCrystalWindow(7.38, y, z, winW, winH, -Math.PI / 2);
     }
 });
 
-// ===== B-WING WINDOWS (All 4 sides) =====
-// Front face (Z = -7.5)
+// B-WING WINDOWS
 windowFloorsY.forEach(y => {
     for (let x = 4; x <= 38; x += 4.2) {
         addCrystalWindow(x, y, -7.48, winW, winH);
     }
 });
-
-// Back face (Z = 7.5)
 windowFloorsY.forEach(y => {
     for (let x = 4; x <= 38; x += 4.2) {
         addCrystalWindow(x, y, 7.48, winW, winH);
     }
 });
-
-// Left face (X = 1.25)
 windowFloorsY.forEach(y => {
     for (let z = -5.5; z <= 5.5; z += 4) {
         addCrystalWindow(1.27, y, z, winW, winH, Math.PI / 2);
     }
 });
-
-// Right face (X = 40.75)
 windowFloorsY.forEach(y => {
     for (let z = -5.5; z <= 5.5; z += 4) {
         addCrystalWindow(40.73, y, z, winW, winH, -Math.PI / 2);
     }
 });
 
-// Corner accent windows for A-Wing
+// Corner accent windows
 const cornerX = [-6.8, 6.8];
 windowFloorsY.forEach(y => {
     cornerX.forEach(x => {
@@ -474,23 +450,23 @@ windowFloorsY.forEach(y => {
     });
 });
 
-// Grand Entrance with crystal clear glass
+// Grand Entrance
 const entranceGlassBig = new THREE.Mesh(new THREE.BoxGeometry(5.8, 4.5, 0.18), windowGlassCrisp);
 entranceGlassBig.position.set(0, 2.2, -2.78);
 entranceGlassBig.castShadow = true;
-scene.add(entranceGlassBig);
+addBuilding(entranceGlassBig);
 
 const entranceFrameBig = new THREE.Mesh(new THREE.BoxGeometry(6.2, 4.8, 0.12), goldAccent);
 entranceFrameBig.position.set(0, 2.2, -2.72);
 entranceFrameBig.castShadow = true;
-scene.add(entranceFrameBig);
+addBuilding(entranceFrameBig);
 
 const entranceCanopy = new THREE.Mesh(new THREE.BoxGeometry(7, 0.2, 3.5), goldAccent);
 entranceCanopy.position.set(0, 4.8, -3.2);
 entranceCanopy.castShadow = true;
-scene.add(entranceCanopy);
+addBuilding(entranceCanopy);
 
-// --- INTERNAL ROOMS (Floors data) ---
+// --- INTERNAL ROOMS ---
 const allRooms = [];
 const originalYmap = new Map();
 
@@ -538,7 +514,7 @@ function createRoom(x, z, w, d, yBase, h, num, name, dept, type, floorIdx) {
 }
 
 const floorsSpec = [
-    { yBase: 0.0, a: ["G01:Workshop","G02:CAD Lab","G03:Faculty","G04:Classroom","G05:HVAC Lab","G06:Thermo"], b:["G20:Parking","G21:Faculty","G22:Classroom","G23:Sports"] },
+    { yBase: 0.0,  a: ["G01:Workshop","G02:CAD Lab","G03:Faculty","G04:Classroom","G05:HVAC Lab","G06:Thermo"], b:["G20:Parking","G21:Faculty","G22:Classroom","G23:Sports"] },
     { yBase: 3.65, a:["101:Seminar Hall","102:ME Lab","103:Mechatronics","104:Faculty","105:Classroom","106:Power System"], b:["IQAC Office","Principal Cabin","Account","Reception","Exam Cell"] },
     { yBase: 7.30, a:["201:Classroom","202:Classroom","203:Classroom","204:Design Thinking","205:Comp Lab","Library"], b:["221:Alumni","222:Software Lab","223:Hardware Lab","224:Faculty","225:TPO"] },
     { yBase: 10.95, a:["301:Chemistry Lab","302:Physics Lab","303:Tutorial","304:Classroom","305:Programming Lab"], b:["320:HOD AIDS","321:Faculty AIDS","322:Data Science","323:ML Lab"] },
@@ -577,6 +553,200 @@ floorsSpec.forEach((floor, idx) => {
 
 allRooms.forEach(r => { r.mesh.visible = false; r.label.visible = false; });
 
+// ============================================================
+//  EXPLOSION / BLAST SYSTEM
+// ============================================================
+const BLAST_CENTER = new THREE.Vector3(10, 9, -10); // approx center of building mass
+let explodeState = 'idle'; // 'idle' | 'blasting' | 'exploded' | 'resetting'
+let explodeProgress = 0;   // 0..1
+const BLAST_DURATION  = 1.4; // seconds to explode
+const RESET_DURATION  = 1.8; // seconds to reset
+
+// Particle system for blast sparks
+const PARTICLE_COUNT = 220;
+const particleGeo = new THREE.BufferGeometry();
+const positions = new Float32Array(PARTICLE_COUNT * 3);
+const particleVels = [];
+particleGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+
+const particleMat = new THREE.PointsMaterial({
+    color: 0xff6600,
+    size: 0.55,
+    transparent: true,
+    opacity: 1.0,
+    sizeAttenuation: true,
+    depthWrite: false
+});
+const particles = new THREE.Points(particleGeo, particleMat);
+particles.visible = false;
+scene.add(particles);
+
+// Randomised blast velocities for every building part (computed once; reused each blast)
+buildingParts.forEach(part => {
+    const dir = new THREE.Vector3(
+        part.origPos.x - BLAST_CENTER.x,
+        part.origPos.y - BLAST_CENTER.y + 4,
+        part.origPos.z - BLAST_CENTER.z
+    ).normalize();
+    const speed = 18 + Math.random() * 28;
+    part.vel = dir.multiplyScalar(speed).add(new THREE.Vector3(
+        (Math.random() - 0.5) * 10,
+        Math.random() * 12,
+        (Math.random() - 0.5) * 10
+    ));
+    part.angVel = new THREE.Vector3(
+        (Math.random() - 0.5) * 4,
+        (Math.random() - 0.5) * 4,
+        (Math.random() - 0.5) * 4
+    );
+});
+
+function initParticles() {
+    for (let i = 0; i < PARTICLE_COUNT; i++) {
+        positions[i*3 + 0] = BLAST_CENTER.x + (Math.random() - 0.5) * 4;
+        positions[i*3 + 1] = BLAST_CENTER.y + (Math.random() - 0.5) * 4;
+        positions[i*3 + 2] = BLAST_CENTER.z + (Math.random() - 0.5) * 4;
+        const theta = Math.random() * Math.PI * 2;
+        const phi   = Math.acos(2 * Math.random() - 1);
+        const speed = 18 + Math.random() * 30;
+        particleVels.push(new THREE.Vector3(
+            Math.sin(phi) * Math.cos(theta) * speed,
+            Math.sin(phi) * Math.sin(theta) * speed + 8,
+            Math.cos(phi) * speed
+        ));
+    }
+    particleGeo.attributes.position.needsUpdate = true;
+}
+initParticles();
+
+// Flash light for explosion
+const blastLight = new THREE.PointLight(0xff4400, 0, 35);
+blastLight.position.copy(BLAST_CENTER);
+scene.add(blastLight);
+
+// Shake / rumble state
+let shakeTime = 0;
+
+function triggerExplode() {
+    if (explodeState === 'blasting' || explodeState === 'resetting') return;
+
+    explodeState = 'blasting';
+    explodeProgress = 0;
+    shakeTime = 0.4;
+
+    // Reset particles to blast center
+    for (let i = 0; i < PARTICLE_COUNT; i++) {
+        positions[i*3+0] = BLAST_CENTER.x + (Math.random()-0.5)*2;
+        positions[i*3+1] = BLAST_CENTER.y + (Math.random()-0.5)*2;
+        positions[i*3+2] = BLAST_CENTER.z + (Math.random()-0.5)*2;
+    }
+    particleGeo.attributes.position.needsUpdate = true;
+    particles.visible = true;
+    particleMat.opacity = 1.0;
+
+    // Flash light
+    blastLight.intensity = 12;
+
+    document.getElementById('explodedBtn').textContent = '💥 Blasting…';
+    document.getElementById('resetBlastBtn').style.display = 'inline-block';
+}
+
+function triggerReset() {
+    if (explodeState === 'idle' || explodeState === 'resetting') return;
+    explodeState = 'resetting';
+    explodeProgress = 0;
+    particles.visible = false;
+    document.getElementById('explodedBtn').textContent = '💥 Explode';
+    document.getElementById('resetBlastBtn').style.display = 'none';
+}
+
+// Easing helpers
+function easeOutCubic(t)  { return 1 - Math.pow(1 - t, 3); }
+function easeInOutCubic(t){ return t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t+2,3)/2; }
+
+let lastTime = performance.now();
+
+function updateExplode(deltaSeconds) {
+    if (explodeState === 'idle') return;
+
+    if (explodeState === 'blasting') {
+        explodeProgress = Math.min(explodeProgress + deltaSeconds / BLAST_DURATION, 1);
+        const t = easeOutCubic(explodeProgress);
+
+        // Camera shake during initial blast
+        if (shakeTime > 0) {
+            shakeTime -= deltaSeconds;
+            const shk = Math.max(shakeTime, 0) * 1.2;
+            camera.position.x += (Math.random()-0.5) * shk;
+            camera.position.y += (Math.random()-0.5) * shk;
+        }
+
+        // Move building parts
+        buildingParts.forEach(part => {
+            part.obj.position.set(
+                part.origPos.x + part.vel.x * t,
+                part.origPos.y + part.vel.y * t,
+                part.origPos.z + part.vel.z * t
+            );
+            part.obj.rotation.x = part.origRot.x + part.angVel.x * t * 3;
+            part.obj.rotation.y = part.origRot.y + part.angVel.y * t * 3;
+            part.obj.rotation.z = part.origRot.z + part.angVel.z * t * 3;
+        });
+
+        // Move particles
+        const dt = deltaSeconds;
+        for (let i = 0; i < PARTICLE_COUNT; i++) {
+            positions[i*3+0] += particleVels[i].x * dt;
+            positions[i*3+1] += particleVels[i].y * dt - 9.8 * dt * dt * 3;
+            positions[i*3+2] += particleVels[i].z * dt;
+            particleVels[i].y -= 9.8 * dt * 2; // gravity
+        }
+        particleGeo.attributes.position.needsUpdate = true;
+        particleMat.opacity = Math.max(1 - explodeProgress * 0.7, 0.3);
+
+        // Fade blast flash light
+        blastLight.intensity = Math.max(0, 12 * (1 - explodeProgress * 3));
+
+        // Cycle particle colour: orange → yellow → white
+        const hue = explodeProgress < 0.3 ? 0.08 : (explodeProgress < 0.6 ? 0.12 : 0.15);
+        particleMat.color.setHSL(hue, 1, 0.55 + explodeProgress * 0.2);
+
+        if (explodeProgress >= 1) {
+            explodeState = 'exploded';
+            document.getElementById('explodedBtn').textContent = '💥 Exploded!';
+        }
+    }
+
+    if (explodeState === 'resetting') {
+        explodeProgress = Math.min(explodeProgress + deltaSeconds / RESET_DURATION, 1);
+        const t = easeInOutCubic(explodeProgress);
+
+        buildingParts.forEach(part => {
+            part.obj.position.lerpVectors(
+                new THREE.Vector3(
+                    part.origPos.x + part.vel.x,
+                    part.origPos.y + part.vel.y,
+                    part.origPos.z + part.vel.z
+                ),
+                part.origPos,
+                t
+            );
+            part.obj.rotation.x = THREE.MathUtils.lerp(part.origRot.x + part.angVel.x * 3, part.origRot.x, t);
+            part.obj.rotation.y = THREE.MathUtils.lerp(part.origRot.y + part.angVel.y * 3, part.origRot.y, t);
+            part.obj.rotation.z = THREE.MathUtils.lerp(part.origRot.z + part.angVel.z * 3, part.origRot.z, t);
+        });
+
+        if (explodeProgress >= 1) {
+            explodeState = 'idle';
+            // Snap exactly to original
+            buildingParts.forEach(part => {
+                part.obj.position.copy(part.origPos);
+                part.obj.rotation.set(part.origRot.x, part.origRot.y, part.origRot.z, part.origRot.order);
+            });
+        }
+    }
+}
+
 // --- UI Interactions ---
 function setFloorVisibility(floorIdx) {
     allRooms.forEach(room => {
@@ -613,15 +783,27 @@ document.getElementById('roomSearch').addEventListener('input', (e) => {
     });
 });
 
-let exploded = false;
+// 💥 EXPLODE button
 document.getElementById('explodedBtn').onclick = () => {
-    exploded = !exploded;
-    allRooms.forEach(room => {
-        const origY = originalYmap.get(room.mesh);
-        if (exploded && room.mesh.visible) room.mesh.position.y = origY + (room.metadata.floorIndex + 1) * 2.2;
-        else room.mesh.position.y = origY;
-    });
+    if (explodeState === 'idle' || explodeState === 'exploded') {
+        if (explodeState === 'exploded') {
+            triggerReset();
+        } else {
+            triggerExplode();
+        }
+    } else if (explodeState === 'blasting') {
+        // Allow re-triggering once blasted
+    }
 };
+
+// Make it cleaner: click = explode, always
+document.getElementById('explodedBtn').onclick = () => {
+    if (explodeState === 'idle') triggerExplode();
+    else if (explodeState === 'exploded') triggerExplode(); // re-blast
+};
+
+// 🔄 RESET button
+document.getElementById('resetBlastBtn').onclick = () => triggerReset();
 
 let clipping = false;
 const clipPlane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
@@ -696,8 +878,13 @@ window.addEventListener('mousemove', (event) => {
 let time = 0;
 function animate() {
     requestAnimationFrame(animate);
-    time += 0.02;
+    const now = performance.now();
+    const delta = Math.min((now - lastTime) / 1000, 0.1); // cap at 100ms
+    lastTime = now;
+    time += delta;
+
     fillLight.intensity = 0.65 + Math.sin(time) * 0.08;
+    updateExplode(delta);
     controls.update();
     renderer.render(scene, camera);
     labelRenderer.render(scene, camera);
@@ -711,4 +898,4 @@ window.addEventListener('resize', () => {
     labelRenderer.setSize(window.innerWidth, window.innerHeight);
 });
 
-console.log("✅ Crystal clear windows installed on all sides! Sharp frames, reflective glass, perfect positioning.");
+console.log("✅ Explode blast animation + Reset ready! Building parts tracked:", buildingParts.length);

@@ -91,6 +91,35 @@
         input { background: #0f1a24; min-width: 100px; }
         input:focus { outline: none; border: 1px solid #ffd700; background: #1a2c3c; }
         #measureStatus { color: #ffd700; font-size: clamp(10px, 2.5vw, 11px); margin-left: 4px; }
+        #explodedBtn {
+            background: linear-gradient(135deg, #ff4400, #ff8800);
+            color: #fff;
+            font-weight: 700;
+            box-shadow: 0 0 12px rgba(255,80,0,0.5);
+            animation: pulseExplode 2s infinite;
+        }
+        #explodedBtn:hover { background: linear-gradient(135deg, #ff6600, #ffaa00); box-shadow: 0 0 22px rgba(255,120,0,0.8); transform: translateY(-2px) scale(1.05); }
+        @keyframes pulseExplode {
+            0%, 100% { box-shadow: 0 0 10px rgba(255,80,0,0.4); }
+            50%       { box-shadow: 0 0 22px rgba(255,120,0,0.9); }
+        }
+        #resetBlastBtn {
+            background: linear-gradient(135deg, #00aaff, #0055cc);
+            color: #fff;
+            font-weight: 700;
+            box-shadow: 0 0 10px rgba(0,150,255,0.5);
+            display: none;
+        }
+        #resetBlastBtn:hover { background: linear-gradient(135deg, #22ccff, #0077ee); transform: translateY(-2px); }
+        /* Full-screen flash overlay for blast effect */
+        #blast-overlay {
+            position: fixed; inset: 0;
+            background: radial-gradient(circle at 50% 50%, rgba(255,180,0,0.95) 0%, rgba(255,60,0,0.7) 40%, transparent 70%);
+            pointer-events: none;
+            opacity: 0;
+            z-index: 100;
+            transition: opacity 0.08s ease;
+        }
         .mini-map {
             position: absolute;
             bottom: max(85px, 15vh);
@@ -130,11 +159,12 @@
         <h1>🏛️ MODERN COLLEGE OF ENGINEERING | PUNE | G+4 | SKY BLUE WALLS</h1>
         <p>✨ Crystal Clear Windows on All Sides | Canteen | Playground | Gym | <span id="hover-status">Hover any room</span></p>
     </div>
+    <div id="blast-overlay"></div>
     <div class="controls-panel">
         <div class="ctrl-group">🎚️ FLOORS: <button id="floorG">G</button><button id="floor1">1</button><button id="floor2">2</button><button id="floor3">3</button><button id="floor4">4</button><button id="resetFloors">ALL</button></div>
         <div class="ctrl-group">🏷️ DEPT: <select id="deptFilter"><option value="all">All Depts</option><option value="Mechanical">Mechanical</option><option value="Electrical">Electrical</option><option value="Computer Science">CSE</option><option value="IT">IT</option><option value="E&TC">E&TC</option><option value="AIDS">AIDS</option><option value="Admin">Admin/Faculty</option></select></div>
         <div class="ctrl-group">🔍 SEARCH: <input type="text" id="roomSearch" placeholder="Room No / Name"></div>
-        <div class="ctrl-group">🛠️ TOOLS: <button id="explodedBtn">💥 Explode</button><button id="crossSectionBtn">✂️ Cross</button><button id="dayNightBtn">🌙 Night</button><button id="measureBtn">📏 Measure</button></div>
+        <div class="ctrl-group">🛠️ TOOLS: <button id="explodedBtn">💥 Explode</button><button id="resetBlastBtn">🔄 Reset</button><button id="crossSectionBtn">✂️ Cross</button><button id="dayNightBtn">🌙 Night</button><button id="measureBtn">📏 Measure</button></div>
         <div class="ctrl-group">🗺️ <button id="resetView">Reset Camera</button><span id="measureStatus"></span></div>
     </div>
     <div class="mini-map">
