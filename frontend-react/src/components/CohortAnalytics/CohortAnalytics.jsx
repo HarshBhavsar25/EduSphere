@@ -61,6 +61,14 @@ const CohortAnalytics = () => {
   const statsRef = React.useRef(null);
   const alertsRef = React.useRef(null);
   const chatRef = React.useRef(null);
+  const chatBottomRef = React.useRef(null);
+
+  // Auto-scroll to latest message
+  useEffect(() => {
+    if (chatBottomRef.current) {
+      chatBottomRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [chatLog, isTyping]);
 
   const toggleNativeFullscreen = (ref) => {
     if (!document.fullscreenElement) {
@@ -93,13 +101,18 @@ const CohortAnalytics = () => {
     setIsTyping(true);
 
     try {
-      const response = await fetch('http://localhost:5001/api/ai/ask', {
+      const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5001';
+      const response = await fetch(`${baseUrl}/api/ai/ask`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question: userMessage })
+        body: JSON.stringify({
+          question: userMessage,
+          occupancyData,
+          alerts
+        })
       });
       const data = await response.json();
-      
+
       if (data.success) {
         setChatLog(prev => [...prev, { role: 'ai', text: data.answer }]);
       } else {
@@ -248,6 +261,7 @@ const CohortAnalytics = () => {
                 <div className="chat-msg user typing voice-pulsing">Listening to voice...</div>
               </div>
             )}
+            <div ref={chatBottomRef} />
           </div>
 
           <div className="default-prompts-container">

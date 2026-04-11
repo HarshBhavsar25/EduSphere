@@ -55,9 +55,10 @@ def get_stats():
 @analytics_bp.route('/api/analytics/placement-overview', methods=['GET'])
 def placement_overview():
     db = get_db()
+    total = db.students.count_documents({})
     placed = db.students.count_documents({'placed': True})
-    not_placed = db.students.count_documents({'placed': False})
-    return jsonify({'placed': placed, 'not_placed': not_placed})
+    not_placed = total - placed
+    return jsonify({'placed': placed, 'not_placed': not_placed, 'total': total})
 
 
 @analytics_bp.route('/api/analytics/salary-distribution', methods=['GET'])
@@ -292,18 +293,32 @@ def gender_distribution():
                 '_id': '$gender',
                 'count': {'$sum': 1}
             }
-        }
+        },
+        {'$sort': {'_id': 1}}
     ]
     
     results = db.students.aggregate(pipeline)
     
-    labels = []
-    values = []
+    # Fixed order: Female, Male, Other for consistent color mapping
+    data = {}
     for r in results:
-        labels.append(r['_id'] or 'Other')
-        values.append(r['count'])
+        key = r['_id'] or 'Other'
+        data[key] = r['count']
+    
+    # Ensure consistent order
+    ordered_labels = []
+    ordered_values = []
+    for label in ['Female', 'Male', 'Other']:
+        if label in data:
+            ordered_labels.append(label)
+            ordered_values.append(data[label])
+    # Add any unexpected gender values
+    for key, val in data.items():
+        if key not in ['Female', 'Male', 'Other']:
+            ordered_labels.append(key)
+            ordered_values.append(val)
         
     return jsonify({
-        'labels': labels,
-        'values': values
+        'labels': ordered_labels,
+        'values': ordered_values
     })

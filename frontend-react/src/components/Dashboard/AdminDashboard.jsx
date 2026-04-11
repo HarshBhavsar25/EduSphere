@@ -56,6 +56,14 @@ export default function AdminDashboard() {
     // Chart data builders
     const branchColors = (charts.branch || []).map((_, i) => PALETTE[i % PALETTE.length]);
 
+    // Ensure consistent gender data order: Female, Male, Other
+    const genderLabels = ['Female', 'Male', 'Other'];
+    const genderRecord = {};
+    (charts.gender?.labels || []).forEach((lbl, idx) => {
+        genderRecord[lbl] = charts.gender?.values[idx];
+    });
+    const genderValues = genderLabels.map(lbl => genderRecord[lbl] || 0);
+
     return (
         <div>
             <div className="section-header">
@@ -81,10 +89,29 @@ export default function AdminDashboard() {
                 <div className="chart-card">
                     <div className="chart-title">Placement Overview</div>
                     <div className="chart-canvas-wrap">
-                        <Doughnut options={{ ...CHART_DEFAULTS, cutout: '70%' }} data={{
+                        <Doughnut options={{
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            cutout: '70%',
+                            plugins: {
+                                legend: { position: 'bottom', labels: { color: '#94a3b8', font: { family: 'Inter', size: 12 }, padding: 16 } },
+                                tooltip: {
+                                    callbacks: {
+                                        label: (ctx) => {
+                                            const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+                                            const pct = total > 0 ? ((ctx.parsed / total) * 100).toFixed(1) : 0;
+                                            return ` ${ctx.label}: ${ctx.parsed} students (${pct}%)`;
+                                        }
+                                    }
+                                }
+                            }
+                        }} data={{
                             labels: ['Placed', 'Not Placed'],
                             datasets: [{
-                                data: [charts.overview?.placed, charts.overview?.not_placed],
+                                data: [
+                                    stats?.placed_students ?? 0,
+                                    Math.max(0, (stats?.total_students ?? 0) - (stats?.placed_students ?? 0))
+                                ],
                                 backgroundColor: ['rgba(16,185,129,0.8)', 'rgba(251,113,133,0.6)'],
                                 borderColor: ['#10b981', '#fb7185'], borderWidth: 2
                             }]
@@ -180,11 +207,29 @@ export default function AdminDashboard() {
                 <div className="chart-card">
                     <div className="chart-title">Gender Distribution</div>
                     <div className="chart-canvas-wrap">
-                        <Doughnut options={{ ...CHART_DEFAULTS, cutout: '65%' }} data={{
-                            labels: charts.gender?.labels || [],
+                        <Doughnut options={{
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            cutout: '65%',
+                            plugins: {
+                                legend: { position: 'bottom', labels: { color: '#94a3b8', font: { family: 'Inter', size: 12 }, padding: 16 } },
+                                tooltip: {
+                                    callbacks: {
+                                        label: (ctx) => {
+                                            const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+                                            const pct = total > 0 ? ((ctx.parsed / total) * 100).toFixed(1) : 0;
+                                            return ` ${ctx.label}: ${ctx.parsed} students (${pct}%)`;
+                                        }
+                                    }
+                                }
+                            }
+                        }} data={{
+                            labels: genderLabels,
                             datasets: [{
-                                data: charts.gender?.values || [],
-                                backgroundColor: ['rgba(99,102,241,0.8)', 'rgba(251,113,133,0.7)', 'rgba(139,92,246,0.7)'],
+                                data: genderValues,
+                                // Colors match backend's fixed order: Female=pink, Male=indigo, Other=purple
+                                backgroundColor: ['rgba(251,113,133,0.8)', 'rgba(99,102,241,0.8)', 'rgba(139,92,246,0.7)'],
+                                borderColor: ['#fb7185', '#6366f1', '#8b5cf6'],
                                 borderWidth: 2
                             }]
                         }} />
