@@ -1,6 +1,5 @@
 # 🎯 EduSphere
 
-![EduSphere Dashboard Mockup](/assets/dashboard-mock.png)
 
 > **EduSphere** is a full-stack campus placement management system that leverages AI to streamline the hiring process for students, placement officers, and company recruiters. It features intelligent performance analytics, AI-powered mock tests, placement tracking, and role-based dashboards.
 
