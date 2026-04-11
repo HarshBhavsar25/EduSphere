@@ -4,6 +4,7 @@ from models import Student
 from bson import ObjectId
 from datetime import datetime
 import re
+from algorand_utils import save_student_to_blockchain
 
 students_bp = Blueprint('students', __name__)
 
@@ -84,7 +85,10 @@ def create_student():
         'gender': data.get('gender', 'Other'),
         'created_at': datetime.utcnow()
     }
-    
+    tx_id = save_student_to_blockchain(student_doc)
+    if tx_id:
+        student_doc['blockchain_tx_id'] = tx_id
+        
     result = db.students.insert_one(student_doc)
     student_doc['_id'] = result.inserted_id
     
@@ -121,6 +125,12 @@ def update_student(student_id):
             return jsonify({'error': 'Student not found'}), 404
             
         updated_student = db.students.find_one({'_id': ObjectId(student_id)})
+        
+        tx_id = save_student_to_blockchain(updated_student)
+        if tx_id:
+            db.students.update_one({'_id': ObjectId(student_id)}, {'$set': {'blockchain_tx_id': tx_id}})
+            updated_student['blockchain_tx_id'] = tx_id
+            
         return jsonify(Student.to_dict(updated_student))
         
     except Exception as e:
