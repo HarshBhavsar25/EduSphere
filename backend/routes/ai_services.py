@@ -7,6 +7,72 @@ from ai_engine import analyze_resume, skill_gap_analysis, predict_salary, genera
 ai_bp = Blueprint('ai_services', __name__)
 
 
+@ai_bp.route('/api/ai/ask', methods=['POST'])
+def campus_ask():
+    """Campus-aware AI endpoint — uses live occupancy & alert data as context."""
+    from config import Config
+    import json as _json
+    try:
+        from groq import Groq
+        client = Groq(api_key=Config.GROQ_API_KEY)
+    except Exception:
+        return jsonify({'success': False, 'error': 'Groq not configured'}), 503
+
+    data = request.get_json(silent=True) or {}
+    question = data.get('question', '').strip()
+    occupancy = data.get('occupancyData', {})   # { room_id: count }
+    alerts = data.get('alerts', [])             # list of alert objects
+
+    if not question:
+        return jsonify({'success': False, 'error': 'Question is required'}), 400
+
+    # Build a human-readable campus snapshot for the AI
+    occupancy_lines = '\n'.join(
+        f"  • Room {room}: {count} students"
+        for room, count in sorted(occupancy.items(), key=lambda x: -x[1])
+    ) or '  (No occupancy data available)'
+
+    if alerts:
+        alert_lines = '\n'.join(
+            f"  • [{a.get('severity','').upper()}] {a.get('type','')} @ {a.get('location','')}: {a.get('message','')}"
+            for a in alerts
+        )
+    else:
+        alert_lines = '  None — campus operating normally.'
+
+    system_prompt = f"""You are Grok CampusAI, an intelligent campus monitoring assistant embedded in the EduSphere platform.
+You have access to real-time data from the campus sensor network.
+
+CURRENT CAMPUS SNAPSHOT:
+─────────────────────────
+Live Room Occupancy:
+{occupancy_lines}
+
+Active Alerts:
+{alert_lines}
+─────────────────────────
+
+Answer the user's question using ONLY this data. Be concise, factual, and helpful.
+If the question relates to specific rooms or alerts, reference the actual numbers above.
+If no relevant data exists, say so clearly.
+Never make up data. Do not hallucinate room names or counts."""
+
+    try:
+        response = client.chat.completions.create(
+            model=Config.GROQ_MODEL or 'llama-3.3-70b-versatile',
+            messages=[
+                {'role': 'system', 'content': system_prompt},
+                {'role': 'user', 'content': question}
+            ],
+            temperature=0.4,
+            max_tokens=512
+        )
+        answer = response.choices[0].message.content.strip()
+        return jsonify({'success': True, 'answer': answer})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
 @ai_bp.route('/api/ai/analyze-resume', methods=['POST'])
 def ai_analyze_resume():
     if 'resume_file' not in request.files:

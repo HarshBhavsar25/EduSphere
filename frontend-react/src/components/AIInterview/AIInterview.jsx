@@ -42,13 +42,13 @@ function pickVoice(langCode) {
   if (!voices.length) return null;
   const langPrefix = langCode.slice(0, 2); // e.g. 'hi', 'en', 'fr'
 
-  // 1. Exact lang match
-  let v = voices.find(v => v.lang === langCode);
+  // 1. Exact lang match (handling dashes and underscores)
+  let v = voices.find(v => v.lang === langCode || v.lang.replace('_', '-') === langCode);
   // 2. Prefix match
   if (!v) v = voices.find(v => v.lang.startsWith(langPrefix));
-  // 3. Any voice
-  if (!v) v = voices[0];
-  return v;
+  // 3. Do NOT fallback to voices[0] (which may be English and will fail to read other scripts).
+  // Returning null lets the browser use utter.lang to find a system default voice.
+  return v || null;
 }
 
 function detectEmotion(text) {
@@ -99,11 +99,11 @@ function ScoreMeter({ score }) {
   const pct = Math.min(100, Math.max(0, score));
   const color = pct >= 75 ? '#10b981' : pct >= 50 ? '#f59e0b' : '#ef4444';
   return (
-    <div className="score-meter">
-      <div className="score-track">
-        <div className="score-fill" style={{ width: `${pct}%`, background: color }} />
+    <div className="ai-score-meter">
+      <div className="ai-score-track">
+        <div className="ai-score-fill" style={{ width: `${pct}%`, background: color }} />
       </div>
-      <span className="score-label" style={{ color }}>{pct}%</span>
+      <span className="ai-score-label" style={{ color }}>{pct}%</span>
     </div>
   );
 }
