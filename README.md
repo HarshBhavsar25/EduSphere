@@ -17,7 +17,7 @@
 - **Frontend**: React (Vite), CSS3 Glassmorphism, Recharts, Three.js (React Three Fiber)
 - **Backend**: Python (Flask), Flask-CORS, python-dotenv
 - **Database**: MongoDB (Atlas)
-- **AI & Integrations**: Groq Cloud SDK (Llama 3 8B), Pinecone (Vector database for OCR search/RAG)
+- **AI & Integrations**: Groq Cloud SDK (Llama 3 8B), Pinecone (Vector database for OCR search/RAG).
 - **Live Data**: Web sockets (simulated frontend polling & REST pings).
 
 ---
