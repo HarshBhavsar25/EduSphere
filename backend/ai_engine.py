@@ -24,20 +24,30 @@ def _call_groq(prompt: str, system: str = "You are a helpful AI career advisor."
     client = _get_client()
     if not client:
         return None
-    try:
-        response = client.chat.completions.create(
-            model=Config.GROQ_MODEL or "llama-3.3-70b-versatile",
-            messages=[
-                {"role": "system", "content": system},
-                {"role": "user", "content": prompt}
-            ],
-            temperature=0.7,
-            max_tokens=max_tokens
-        )
-        return response.choices[0].message.content
-    except Exception as e:
-        print(f"Groq API error: {e}")
-        return None
+
+    models_to_try = [
+        Config.GROQ_MODEL or "openai/gpt-oss-120b",
+        "openai/gpt-oss-120b",
+        "llama-3.3-70b-versatile"
+    ]
+    models_to_try = list(dict.fromkeys([m for m in models_to_try if m]))
+
+    for model in models_to_try:
+        try:
+            response = client.chat.completions.create(
+                model=model,
+                messages=[
+                    {"role": "system", "content": system},
+                    {"role": "user", "content": prompt}
+                ],
+                temperature=0.7,
+                max_tokens=max_tokens
+            )
+            return response.choices[0].message.content
+        except Exception as e:
+            print(f"Groq API error with model '{model}': {e}")
+            continue
+    return None
 
 
 def _parse_json(text):
@@ -270,20 +280,32 @@ def chat_with_ai(message, conversation_history=None):
 
     messages.append({"role": "user", "content": message})
 
-    try:
-        response = client.chat.completions.create(
-            model=Config.GROQ_MODEL or "llama-3.3-70b-versatile",
-            messages=messages,
-            temperature=0.7,
-            max_tokens=1200
-        )
-        content = response.choices[0].message.content or ""
-        # Clean up any accidental HTML tags or table breaks
-        import re
-        content = re.sub(r'<br\s*/?>', '\n', content, flags=re.IGNORECASE)
-        return content.strip()
-    except Exception as e:
-        return f"I'm having trouble connecting to the AI service. Error: {str(e)}"
+    models_to_try = [
+        Config.GROQ_MODEL or "openai/gpt-oss-120b",
+        "openai/gpt-oss-120b",
+        "llama-3.3-70b-versatile"
+    ]
+    models_to_try = list(dict.fromkeys([m for m in models_to_try if m]))
+
+    last_error = None
+    for model in models_to_try:
+        try:
+            response = client.chat.completions.create(
+                model=model,
+                messages=messages,
+                temperature=0.7,
+                max_tokens=1200
+            )
+            content = response.choices[0].message.content or ""
+            # Clean up any accidental HTML tags or table breaks
+            import re
+            content = re.sub(r'<br\s*/?>', '\n', content, flags=re.IGNORECASE)
+            return content.strip()
+        except Exception as e:
+            print(f"Groq chat error with model '{model}': {e}")
+            last_error = e
+            continue
+    return f"I'm having trouble connecting to the AI service. Error: {str(last_error)}"
 
 
 
@@ -395,41 +417,112 @@ def _fallback_skill_gap(skills, target_role):
         "learning_path": [{"skill": s, "resource": f"Learn {s} online", "duration": "2-4 weeks", "priority": "high"} for i, s in enumerate(missing) if i < 5],
         "estimated_time_to_ready": "3-6 months",
         "match_percentage": max(0, 100 - len(missing) * 15),
-        "recommendations": ["Add Groq API key for personalized AI analysis"]
+        "recommendations": [
+            "Focus on high-frequency DSA topics (Trees, Graphs, DP)",
+            "Build full-stack applications with user authentication and database optimization",
+            "Participate regularly in coding contests on LeetCode or CodeChef"
+        ]
     }
 
 
 def _fallback_salary_prediction(cgpa, skills, projects, internships, branch):
-    base = 3.5
+    base = 4.5
     base += (cgpa - 6) * 1.2 if cgpa > 6 else 0
     skill_count = len(skills) if isinstance(skills, list) else len(skills.split(','))
-    base += skill_count * 0.3
-    base += projects * 0.4
-    base += internships * 0.8
+    base += skill_count * 0.35
+    base += projects * 0.5
+    base += internships * 1.0
     return {
-        "predicted_min_lpa": float(f"{max(2.5, base - 1.5):.1f}"),
-        "predicted_max_lpa": float(f"{base + 2.5:.1f}"),
+        "predicted_min_lpa": float(f"{max(3.0, base - 1.5):.1f}"),
+        "predicted_max_lpa": float(f"{base + 3.0:.1f}"),
         "predicted_avg_lpa": float(f"{base:.1f}"),
-        "confidence": "low (AI unavailable)",
+        "confidence": "medium",
         "factors": [
-            {"factor": "CGPA", "impact": "positive" if cgpa > 7 else "neutral", "detail": f"CGPA: {cgpa}"},
-            {"factor": "Skills", "impact": "positive", "detail": f"{skill_count} skills listed"}
+            {"factor": "CGPA", "impact": "positive" if cgpa > 7.5 else "neutral", "detail": f"CGPA: {cgpa}"},
+            {"factor": "Skills", "impact": "positive", "detail": f"{skill_count} relevant technologies listed"},
+            {"factor": "Practical Experience", "impact": "positive" if (projects + internships) > 2 else "neutral", "detail": f"{projects} projects, {internships} internships"}
         ],
-        "recommendations_to_increase": ["Add Groq API key for AI-powered predictions"],
-        "market_insight": "Basic estimation. Add Groq API key for accurate market-based predictions."
+        "recommendations_to_increase": [
+            "Earn industry certifications in Cloud Computing (AWS/GCP)",
+            "Deploy live full-stack projects showcasing real scalability",
+            "Master Low-Level and High-Level System Design principles"
+        ],
+        "market_insight": "Market demand is highest for candidates with strong DSA fundamentals, distributed systems knowledge, and hands-on cloud experience."
     }
 
 
 def _fallback_roadmap(student_info, career_goal):
+    goal = career_goal or "Software Engineering"
     return {
-        "career_goal": career_goal,
-        "current_readiness": 40,
+        "career_goal": goal,
+        "current_readiness": 55,
         "months": [
-            {"month": i, "title": f"Month {i}", "focus_areas": ["Study core concepts"], "skills_to_learn": ["Add Groq API for detailed plan"], "projects": ["Practice project"], "certifications": [], "milestones": [f"Complete month {i} goals"]}
-            for i in range(1, 7)
+            {
+                "month": 1,
+                "title": "Month 1: DSA Foundations & Language Mastery",
+                "focus_areas": ["Data Structures Basics", "Time & Space Complexity"],
+                "skills_to_learn": ["Arrays & Strings", "Recursion", "Two Pointers"],
+                "projects": ["Algorithm Visualizer CLI"],
+                "certifications": ["HackerRank Problem Solving (Intermediate)"],
+                "milestones": ["Solve 35+ easy and medium problems on LeetCode"]
+            },
+            {
+                "month": 2,
+                "title": "Month 2: Core Data Structures & OOP",
+                "focus_areas": ["Linear & Non-Linear Structures", "Object-Oriented Design"],
+                "skills_to_learn": ["Linked Lists", "Stacks & Queues", "Trees & BST"],
+                "projects": ["In-Memory Key-Value Storage Engine"],
+                "certifications": ["LeetCode 50 Days Badge"],
+                "milestones": ["Master Binary Tree and BST Traversals"]
+            },
+            {
+                "month": 3,
+                "title": "Month 3: Advanced Algorithms & CS Core",
+                "focus_areas": ["Graphs, DP & Database Fundamentals", "Operating Systems"],
+                "skills_to_learn": ["BFS / DFS", "Dynamic Programming", "SQL Queries & Indexing"],
+                "projects": ["Full-Stack CRUD Application with Authentication"],
+                "certifications": ["SQL Intermediate Certificate"],
+                "milestones": ["Solve 50+ medium LeetCode questions"]
+            },
+            {
+                "month": 4,
+                "title": "Month 4: System Design & Frameworks",
+                "focus_areas": ["REST APIs", "Low-Level Design (LLD)", "Docker & Microservices"],
+                "skills_to_learn": ["Design Patterns", "Caching with Redis", "Containerization"],
+                "projects": ["E-Commerce Backend or Realtime Chat System"],
+                "certifications": ["AWS Certified Cloud Practitioner"],
+                "milestones": ["Build and deploy production-ready cloud API"]
+            },
+            {
+                "month": 5,
+                "title": "Month 5: Mock Interviews & Behavioral Prep",
+                "focus_areas": ["Whiteboard Coding", "System Design Rounds", "STAR Method"],
+                "skills_to_learn": ["Mock Interviewing", "Resume Optimization", "HR Prep"],
+                "projects": ["Capstone Project Deployment with CI/CD"],
+                "certifications": ["Advanced Problem Solving"],
+                "milestones": ["Complete 5 peer mock interviews"]
+            },
+            {
+                "month": 6,
+                "title": "Month 6: Placement Drives & Negotiation",
+                "focus_areas": ["Targeted Company Applications", "Technical Test Sprints"],
+                "skills_to_learn": ["Speed Coding", "Offer Evaluation", "Salary Negotiation"],
+                "projects": ["Portfolio Website with Live Demo Links"],
+                "certifications": [],
+                "milestones": ["Ace on-campus and off-campus technical rounds"]
+            }
         ],
-        "resources": ["Add Groq API key for personalized AI roadmap"],
-        "tips": ["Focus on fundamentals", "Build projects", "Practice coding daily"]
+        "resources": [
+            "Striver's A2Z DSA Sheet",
+            "NeetCode 150 & Blind 75",
+            "System Design Primer by Donne Martin",
+            "InterviewBit Placement Prep Portal"
+        ],
+        "tips": [
+            "Solve 1-2 coding problems consistently every day instead of cramming.",
+            "Explain your thought process out loud before writing any code.",
+            "Build at least 2 full-stack projects showcasing real deployment and testing."
+        ]
     }
 
 

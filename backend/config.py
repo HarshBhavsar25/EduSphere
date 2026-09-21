@@ -14,4 +14,4 @@ class Config:
     
     MONGO_DB_NAME = os.getenv('MONGO_DB_NAME', 'hirematrix').strip("'\" ")
     GROQ_API_KEY = os.getenv('GROQ_API_KEY', '').strip("'\" ")
-    GROQ_MODEL = os.getenv('GROQ_MODEL', 'llama-3.3-70b-versatile').strip("'\" ")
+    GROQ_MODEL = os.getenv('GROQ_MODEL', 'openai/gpt-oss-120b').strip("'\" ")

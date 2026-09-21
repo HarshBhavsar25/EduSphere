@@ -14,7 +14,7 @@ def get_config():
     return jsonify({
         'groq_api_key_configured': bool(api_key and api_key != 'your_groq_api_key_here'),
         'groq_api_key_masked': masked_key,
-        'groq_model': os.getenv('GROQ_MODEL', 'llama-3.3-70b-versatile')
+        'groq_model': os.getenv('GROQ_MODEL', 'openai/gpt-oss-120b')
     })
 
 @config_bp.route('/api/config', methods=['POST'])

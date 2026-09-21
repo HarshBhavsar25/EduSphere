@@ -20,7 +20,7 @@ services:
       - key: PINECONE_REGION
         value: us-east-1
       - key: GROQ_MODEL
-        value: llama-3.3-70b-versatile
+        value: openai/gpt-oss-120b
       - key: SECRET_KEY
         generateValue: true
       - key: MONGO_URI

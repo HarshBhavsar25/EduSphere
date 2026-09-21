@@ -59,7 +59,7 @@ Never make up data. Do not hallucinate room names or counts."""
 
     try:
         response = client.chat.completions.create(
-            model=Config.GROQ_MODEL or 'llama-3.3-70b-versatile',
+            model=Config.GROQ_MODEL or 'openai/gpt-oss-120b',
             messages=[
                 {'role': 'system', 'content': system_prompt},
                 {'role': 'user', 'content': question}
@@ -409,7 +409,7 @@ Questions asked so far: {q_asked}"""
 
     try:
         response = client.chat.completions.create(
-            model=Config.GROQ_MODEL or 'llama-3.3-70b-versatile',
+            model=Config.GROQ_MODEL or 'openai/gpt-oss-120b',
             messages=messages,
             temperature=0.75,
             max_tokens=700,
@@ -506,7 +506,7 @@ Questions asked so far: {q_asked} / {num_questions}
 
     try:
         response = client.chat.completions.create(
-            model=Config.GROQ_MODEL or 'llama-3.3-70b-versatile',
+            model=Config.GROQ_MODEL or 'openai/gpt-oss-120b',
             messages=messages,
             temperature=0.75,
             max_tokens=600
