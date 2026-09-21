@@ -244,7 +244,19 @@ def chat_with_ai(message, conversation_history=None):
 
     messages = [{
         "role": "system",
-        "content": "You are an AI placement assistant for a college. Help students with career guidance, interview preparation, resume tips, salary negotiation, and placement-related queries. Be helpful, encouraging, and specific. Keep responses concise but informative."
+        "content": (
+            "You are an expert AI Placement Assistant for the EduSphere campus placement portal. "
+            "Help students with career guidance, DSA & coding roadmaps, technical & HR interview preparation, "
+            "resume reviews, salary negotiation, and placement strategy.\n\n"
+            "CRITICAL FORMATTING GUIDELINES:\n"
+            "1. Output clean, structured Markdown.\n"
+            "2. Use clear headings (###) for major sections.\n"
+            "3. Use bullet points (-) and numbered steps (1., 2.) with **bold keywords** for high scannability.\n"
+            "4. NEVER output raw HTML tags like <br>, <div>, <span>, or <p>.\n"
+            "5. Avoid dense, wide Markdown tables in chat bubbles; prefer structured bullet points or step-by-step lists so it reads beautifully on all screens.\n"
+            "6. Use triple-backtick markdown blocks with language identifier for code snippets.\n"
+            "7. Keep responses concise, organized, actionable, and encouraging."
+        )
     }]
 
     if conversation_history:
@@ -263,9 +275,13 @@ def chat_with_ai(message, conversation_history=None):
             model=Config.GROQ_MODEL or "llama-3.3-70b-versatile",
             messages=messages,
             temperature=0.7,
-            max_tokens=1024
+            max_tokens=1200
         )
-        return response.choices[0].message.content
+        content = response.choices[0].message.content or ""
+        # Clean up any accidental HTML tags or table breaks
+        import re
+        content = re.sub(r'<br\s*/?>', '\n', content, flags=re.IGNORECASE)
+        return content.strip()
     except Exception as e:
         return f"I'm having trouble connecting to the AI service. Error: {str(e)}"
 

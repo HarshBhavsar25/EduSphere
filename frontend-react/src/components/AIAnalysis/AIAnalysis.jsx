@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
+import MarkdownRenderer from '../common/MarkdownRenderer';
 
 const TABS = ['Resume Analyzer', 'Skill Gap', 'Salary Predictor', 'Career Roadmap', 'Job Match', 'AI Chat'];
 
@@ -297,34 +298,99 @@ function JobMatchPanel({ students, lockedId }) {
 
 /* ── AI Chat ─────────────────────────────────────────────────────── */
 function ChatPanel() {
-    const [msgs, setMsgs] = useState([{ role: 'assistant', content: "👋 Hi! I'm your AI placement assistant. Ask me anything about career guidance, interview prep, or placement tips!" }]);
+    const [msgs, setMsgs] = useState([
+        { role: 'assistant', content: "👋 Hi! I'm your AI placement assistant. Ask me anything about career guidance, DSA roadmap, interview prep, or placement tips!" }
+    ]);
     const [input, setInput] = useState('');
     const [loading, setLoading] = useState(false);
+    const messagesEndRef = useRef(null);
 
-    async function send() {
-        if (!input.trim()) return;
-        const userMsg = { role: 'user', content: input };
+    const QUICK_PROMPTS = [
+        "How to start DSA for placements?",
+        "Top technical interview tips",
+        "How to prepare for HR rounds?",
+        "Tips to make my resume stand out"
+    ];
+
+    useEffect(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, [msgs, loading]);
+
+    async function send(queryText) {
+        const text = (queryText || input).trim();
+        if (!text || loading) return;
+        const userMsg = { role: 'user', content: text };
         setMsgs(m => [...m, userMsg]);
         setInput('');
         setLoading(true);
         try {
-            const res = await api.chatWithAI({ message: input, history: msgs });
+            const res = await api.chatWithAI({ message: text, history: msgs });
             setMsgs(m => [...m, { role: 'assistant', content: res.response }]);
-        } catch (e) { setMsgs(m => [...m, { role: 'assistant', content: 'Sorry, I had trouble connecting. Please try again.' }]); }
-        finally { setLoading(false); }
+        } catch (e) {
+            setMsgs(m => [...m, { role: 'assistant', content: 'Sorry, I had trouble connecting to the AI service. Please try again.' }]);
+        } finally {
+            setLoading(false);
+        }
     }
 
     return (
-        <div>
-            <h4 style={{ color: 'var(--text-primary)', marginBottom: '1rem' }}><i className="fas fa-comments" style={{ color: 'var(--accent-indigo)', marginRight: 8 }} />AI Placement Assistant</h4>
-            <div className="chat-messages">
-                {msgs.map((m, i) => <div key={i} className={`chat-msg ${m.role === 'assistant' ? 'ai' : 'user'}`}>{m.content}</div>)}
-                {loading && <div className="chat-msg ai"><i className="fas fa-spinner fa-spin" style={{ color: 'var(--text-muted)' }} /> Thinking...</div>}
+        <div className="ai-chat-panel">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                <h4 style={{ color: 'var(--text-primary)', margin: 0 }}>
+                    <i className="fas fa-comments" style={{ color: 'var(--accent-indigo)', marginRight: 8 }} />
+                    AI Placement Assistant
+                </h4>
+                <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                    Markdown & Code Supported
+                </span>
             </div>
+
+            <div className="chat-messages">
+                {msgs.map((m, i) => (
+                    <div key={i} className={`chat-msg ${m.role === 'assistant' ? 'ai' : 'user'}`}>
+                        {m.role === 'assistant' ? (
+                            <MarkdownRenderer content={m.content} />
+                        ) : (
+                            <div style={{ whiteSpace: 'pre-wrap' }}>{m.content}</div>
+                        )}
+                    </div>
+                ))}
+                {loading && (
+                    <div className="chat-msg ai">
+                        <i className="fas fa-spinner fa-spin" style={{ color: 'var(--accent-indigo)', marginRight: 8 }} />
+                        <span style={{ color: 'var(--text-muted)' }}>Thinking & formatting reply...</span>
+                    </div>
+                )}
+                <div ref={messagesEndRef} />
+            </div>
+
+            {msgs.length <= 2 && (
+                <div className="chat-quick-prompts" style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.85rem' }}>
+                    {QUICK_PROMPTS.map((prompt, idx) => (
+                        <button
+                            key={idx}
+                            type="button"
+                            className="quick-prompt-btn"
+                            onClick={() => send(prompt)}
+                            disabled={loading}
+                        >
+                            {prompt}
+                        </button>
+                    ))}
+                </div>
+            )}
+
             <div className="chat-input-wrap">
-                <input className="chat-input" value={input} onChange={e => setInput(e.target.value)}
-                    onKeyDown={e => e.key === 'Enter' && !loading && send()} placeholder="Ask about careers, interview tips, placements..." />
-                <button className="btn btn-primary" onClick={send} disabled={loading || !input.trim()}><i className="fas fa-paper-plane" /></button>
+                <input
+                    className="chat-input"
+                    value={input}
+                    onChange={e => setInput(e.target.value)}
+                    onKeyDown={e => e.key === 'Enter' && !loading && send()}
+                    placeholder="Ask about careers, interview tips, DSA roadmaps, placements..."
+                />
+                <button className="btn btn-primary" onClick={() => send()} disabled={loading || !input.trim()}>
+                    <i className="fas fa-paper-plane" />
+                </button>
             </div>
         </div>
     );

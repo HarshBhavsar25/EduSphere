@@ -3,6 +3,7 @@ import { useCampus } from '../../context/CampusContext';
 import { FLOORS } from '../../config/locations';
 import FloorPlan from './FloorPlan';
 import { Activity, BellRing, Bot, Map, Users, AlertTriangle, Zap, Send, Maximize2, Minimize2, Mic, MicOff } from 'lucide-react';
+import MarkdownRenderer from '../common/MarkdownRenderer';
 import './CohortAnalytics.css';
 
 const DEFAULT_PROMPTS = [
@@ -247,7 +248,11 @@ const CohortAnalytics = () => {
             {chatLog.map((msg, idx) => (
               <div key={idx} className={`chat-wrapper ${msg.role}`}>
                 <div className={`chat-msg ${msg.role}`}>
-                  <span>{msg.text}</span>
+                  {msg.role === 'ai' ? (
+                    <MarkdownRenderer content={msg.text} />
+                  ) : (
+                    <span>{msg.text}</span>
+                  )}
                 </div>
               </div>
             ))}
