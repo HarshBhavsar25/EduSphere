@@ -41,8 +41,8 @@ Campus placement operations at scale face significant operational and pedagogica
 ## 2. System Architecture
 
 ```mermaid
-graph TB
-    subgraph Client Layer ["Client Layer (React 19 + Vite)"]
+flowchart TB
+    subgraph ClientLayer ["Client Layer (React 19 + Vite)"]
         UI_Student["Student Dashboard & AI Suite"]
         UI_Admin["Admin Placement Intelligence"]
         UI_Interview["ARIA AI Voice Interviewer"]
@@ -56,7 +56,7 @@ graph TB
         KeepAlive["Keep-Alive Ping Handler (/api/ping)"]
     end
 
-    subgraph Service Layer ["Backend Services (Python Flask 3.0)"]
+    subgraph ServiceLayer ["Backend Services (Python Flask 3.0)"]
         AuthSvc["Auth Service (routes/auth.py)"]
         StudentSvc["Student Service (routes/students.py)"]
         CompanySvc["Company & Job Service (routes/companies.py, jobs.py)"]
@@ -66,16 +66,16 @@ graph TB
         AlgoSvc["Algorand Blockchain Client (algorand_utils.py)"]
     end
 
-    subgraph External Services ["External Platforms & Storage"]
-        MongoDB[(MongoDB Atlas / Document DB)]
+    subgraph ExternalServices ["External Platforms & Storage"]
+        MongoDB[("MongoDB Atlas / Document DB")]
         GroqLLM["Groq Cloud API (Llama 3.3 / GPT-OSS-120B)"]
         AlgorandNet["Algorand TestNet (Node Cloud)"]
         OCREngine["Tesseract OCR & PyPDF2 Engine"]
     end
 
-    Client Layer --> Gateway
-    Gateway --> Service Layer
-    Service Layer --> MongoDB
+    ClientLayer --> Gateway
+    Gateway --> ServiceLayer
+    ServiceLayer --> MongoDB
     AIEngine --> GroqLLM
     AIEngine --> OCREngine
     AlgoSvc --> AlgorandNet

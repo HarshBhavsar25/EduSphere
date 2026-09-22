@@ -27,8 +27,8 @@
 **EduSphere** is an AI-powered, full-stack campus recruitment and placement management platform. It unites students, Training & Placement Officers (TPOs), and corporate recruiters through predictive placement analytics, generative AI preparation tools, Algorand blockchain credential anchoring, and an interactive 3D virtual campus.
 
 ```mermaid
-graph TB
-    subgraph Client Layer ["Client Layer (React 19 + Vite)"]
+flowchart TB
+    subgraph ClientLayer ["Client Layer (React 19 + Vite)"]
         UI_Student["Student Dashboard & AI Prep Suite"]
         UI_Admin["TPO Placement Analytics Portal"]
         UI_Interview["ARIA Voice AI Interviewer"]
@@ -42,7 +42,7 @@ graph TB
         KeepAlive["Keep-Alive Ping Handler (/api/ping)"]
     end
 
-    subgraph Service Layer ["Backend Services (Python Flask 3.0)"]
+    subgraph ServiceLayer ["Backend Services (Python Flask 3.0)"]
         AuthSvc["Auth Service (routes/auth.py)"]
         StudentSvc["Student Service (routes/students.py)"]
         CompanySvc["Company & Job Service (routes/companies.py, jobs.py)"]
@@ -52,16 +52,16 @@ graph TB
         AlgoSvc["Algorand Blockchain Client (algorand_utils.py)"]
     end
 
-    subgraph External Services ["External Platforms & Storage"]
-        MongoDB[(MongoDB Atlas / Document DB)]
+    subgraph ExternalServices ["External Platforms & Storage"]
+        MongoDB[("MongoDB Atlas / Document DB")]
         GroqLLM["Groq Cloud API (Llama 3.3 / GPT-OSS-120B)"]
         AlgorandNet["Algorand TestNet (Node Cloud)"]
         OCREngine["Tesseract OCR & PyPDF2 Engine"]
     end
 
-    Client Layer --> Gateway
-    Gateway --> Service Layer
-    Service Layer --> MongoDB
+    ClientLayer --> Gateway
+    Gateway --> ServiceLayer
+    ServiceLayer --> MongoDB
     AIEngine --> GroqLLM
     AIEngine --> OCREngine
     AlgoSvc --> AlgorandNet
